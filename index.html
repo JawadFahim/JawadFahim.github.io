@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Jawad's Portfolio</title>
+  <link rel="stylesheet" href="./style.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
+</head>
+<body>
+
+  <!-- Fixed ambient background (scanlines + vignette handled by body::before/after) -->
+
+  <!-- ── HERO SECTION — fixed above terminal, scrolls with page ── -->
+  <header id="hero">
+    <pre id="hero-ascii">
+     ██╗ █████╗ ██╗    ██╗ █████╗ ██████╗ 
+     ██║██╔══██╗██║    ██║██╔══██╗██╔══██╗
+     ██║███████║██║ █╗ ██║███████║██║  ██║
+██   ██║██╔══██║██║███╗██║██╔══██║██║  ██║
+╚█████╔╝██║  ██║╚███╔███╔╝██║  ██║██████╔╝
+ ╚════╝ ╚═╝  ╚═╝ ╚══╝╚══╝ ╚═╝  ╚═╝╚═════╝</pre>
+    <p class="typing-demo">Full-Stack Developer · CS Student · IEEE Webmaster</p>
+  </header>
+
+  <!-- ── TERMINAL CHROME (titlebar) — fixed ── -->
+  <div class="buttons-bar">
+    <div class="buttons">
+      <div class="close"></div>
+      <div class="minimize"></div>
+      <div class="expand"></div>
+    </div>
+  </div>
+
+  <!-- ── TERMINAL BODY — fixed, inner content scrolls ── -->
+  <div id="terminal">
+    <div id="output"></div>
+    <div id="input" class="command-input">
+      <span id="prompt">
+        <span class="ownerTerminal"><b>jawad@profile</b></span><b>:~$</b>
+      </span>
+      <input
+        type="text"
+        id="cmd"
+        oninput="showSuggestions()"
+        onkeydown="handleKeyDown(event)"
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </div>
+    <div id="suggestions"></div>
+  </div>
+
+  <script src="./script.js"></script>
+</body>
+</html>

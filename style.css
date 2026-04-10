@@ -1,0 +1,867 @@
+/* ============================================================
+   BASE RESET & FONT
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  font-size: 16px;
+}
+
+/* ============================================================
+   IDEA #2 — ANIMATED AMBIENT BACKGROUND
+   ============================================================ */
+body {
+  font-family: 'JetBrains Mono', monospace;
+  color: #e0e0e0;
+  height: 100vh;
+  overflow: hidden; /* page itself never scrolls — terminal scrolls internally */
+  background: linear-gradient(135deg, #0a0a12, #0d1117, #0f0c29, #12001f, #0a0a12);
+  background-size: 400% 400%;
+  animation: ambientBG 20s ease infinite;
+  position: relative;
+}
+
+@keyframes ambientBG {
+  0%   { background-position: 0% 50%; }
+  25%  { background-position: 50% 0%; }
+  50%  { background-position: 100% 50%; }
+  75%  { background-position: 50% 100%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ============================================================
+   IDEA #1 — SCANLINE + CRT GLOW OVERLAY
+   ============================================================ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 0, 0, 0.08) 3px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+  animation: scanlines 8s linear infinite;
+}
+
+@keyframes scanlines {
+  0%   { background-position: 0 0; }
+  100% { background-position: 0 100px; }
+}
+
+/* Subtle vignette around edges */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.55) 100%);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* ============================================================
+   HERO — fixed name + subtitle above the terminal
+   ============================================================ */
+#hero {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(95vw, 900px);
+  z-index: 20;
+  padding: 16px 28px 10px;
+  background: transparent;
+  border-bottom: none;
+  text-align: left;
+}
+
+#hero-ascii {
+  color: #56d364;
+  font-size: clamp(7px, 1.3vw, 13px);
+  line-height: 1.25;
+  text-shadow: 0 0 14px rgba(86, 211, 100, 0.45);
+  white-space: pre;
+  margin-bottom: 6px;
+}
+
+/* ============================================================
+   IDEA #5 — GLASSMORPHISM TERMINAL WINDOW (fixed in center)
+   ============================================================ */
+
+/* Titlebar — fixed, sits directly under hero */
+.buttons-bar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(95vw, 900px);
+  z-index: 15;
+  background: rgba(30, 32, 40, 0.95);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  padding: 9px 16px;
+  border-radius: 10px 10px 0 0;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Titlebar label */
+.buttons-bar::after {
+  content: 'jawad@profile — terminal';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+}
+
+/* Terminal body — fixed, fills remaining viewport height */
+#terminal {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(95vw, 900px);
+  z-index: 10;
+  font-family: 'JetBrains Mono', monospace;
+  color: #e0e0e0;
+
+  /* Glass effect */
+  background: rgba(13, 17, 23, 0.82);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-top: none;
+  border-radius: 0 0 14px 14px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04),
+    0 25px 60px rgba(0, 0, 0, 0.65),
+    0 0 80px rgba(0, 200, 100, 0.03),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+  text-shadow: 0 0 6px rgba(180, 255, 200, 0.07);
+
+  /* Inner scroll */
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px 28px 24px;
+  scroll-behavior: smooth;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom scrollbar */
+#terminal::-webkit-scrollbar { width: 4px; }
+#terminal::-webkit-scrollbar-track { background: transparent; }
+#terminal::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+#terminal::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+
+.buttons {
+  display: flex;
+  gap: 7px;
+}
+
+.buttons .close,
+.buttons .minimize,
+.buttons .expand {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  transition: filter 0.2s ease;
+  cursor: pointer;
+}
+
+.buttons .close    { background-color: #ff5f57; }
+.buttons .minimize { background-color: #febc2e; }
+.buttons .expand   { background-color: #28c840; }
+
+.buttons .close:hover    { filter: brightness(1.2); }
+.buttons .minimize:hover { filter: brightness(1.2); }
+.buttons .expand:hover   { filter: brightness(1.2); }
+
+/* ============================================================
+   IDEA #3 — COLORED PROMPT SEGMENTS
+   ============================================================ */
+.ownerTerminal {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+/* user part: jawad */
+.ownerTerminal b,
+.ownerTerminal {
+  color: #56d364;
+}
+
+/* The :~$ part */
+#prompt b {
+  color: #e3b341;
+  font-size: 15px;
+}
+
+/* Command name highlight in help list */
+.commandName {
+  color: #79c0ff;
+  font-weight: 700;
+}
+
+/* ============================================================
+   HELP CMD LIST — injected into #output after boot, styled via .output-block
+   ============================================================ */
+#helpCmdList {
+  font-size: 13px;
+  color: #8b949e;
+  line-height: 2;
+  margin-top: 4px;
+}
+
+/* ============================================================
+   TYPING ANIMATION (lives in #hero now)
+   ============================================================ */
+.typing-demo {
+  width: 52ch;
+  animation: typing 2.2s steps(52), blink 0.5s step-end infinite alternate;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 2px solid #56d364;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  color: #8b949e;
+  margin: 0;
+}
+
+@keyframes typing {
+  from { width: 0; }
+}
+
+@keyframes blink {
+  50% { border-color: transparent; }
+}
+
+/* ============================================================
+   IDEA #4 — COMMAND OUTPUT FADE-IN ANIMATION
+   ============================================================ */
+#output {
+  flex: 1;           /* fills available space, pushing input to bottom */
+  line-height: 1.7;
+  font-size: 14px;
+  overflow-y: visible; /* parent #terminal handles the scroll */
+}
+
+#output > div,
+#output > .output-block,
+#output > .output-cmd,
+#output > .boot-line,
+#output > .cmd-not-found {
+  animation: fadeInUp 0.18s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   IDEA #6 — SYNTAX-HIGHLIGHTED OUTPUT
+   ============================================================ */
+
+/* Echoed command line */
+.output-cmd {
+  color: #8b949e;
+  font-size: 14px;
+  margin-bottom: 2px;
+  animation: fadeInUp 0.18s ease forwards;
+}
+
+.output-cmd .cmd-name  { color: #79c0ff; font-weight: 700; }
+.output-cmd .cmd-flag  { color: #e3b341; }
+.output-cmd .cmd-error { color: #f85149; }
+.output-cmd .cmd-ok    { color: #56d364; }
+
+/* "Not found" error */
+.cmd-not-found {
+  color: #f85149;
+  font-size: 14px;
+  animation: fadeInUp 0.18s ease forwards;
+}
+.cmd-not-found::before {
+  content: 'bash: ';
+  color: #8b949e;
+}
+.cmd-not-found::after {
+  content: ': command not found';
+  color: #8b949e;
+}
+
+/* (helpCmdList styles defined above) */
+
+/* Email click-to-copy */
+.email-copy {
+  color: #79c0ff;
+  cursor: pointer;
+  border-bottom: 1px dashed rgba(121, 192, 255, 0.5);
+  transition: color 0.15s ease, border-color 0.15s ease;
+  font-family: monospace;
+}
+.email-copy:hover {
+  color: #56d364;
+  border-bottom-color: rgba(86, 211, 100, 0.6);
+}
+.email-copy-hint {
+  color: #8b949e;
+  font-size: 11px;
+  font-style: italic;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+.output-block:hover .email-copy-hint {
+  opacity: 1;
+}
+
+/* ============================================================
+   COMMAND INPUT LINE — pinned to bottom of terminal
+   ============================================================ */
+#input.command-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 15px;
+  flex-shrink: 0;  /* never shrink — always visible */
+}
+
+#cmd {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  background: transparent;
+  border: none;
+  color: #e0e0e0;
+  outline: none;
+  caret-color: #56d364;
+  width: 70%;
+  transition: caret-color 0.3s ease;
+}
+
+#cmd:focus {
+  caret-color: #56d364;
+}
+
+/* Suggestions dropdown */
+#suggestions {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #8b949e;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+#suggestions div {
+  padding: 2px 10px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+#suggestions div:hover {
+  background: rgba(86, 211, 100, 0.12);
+  border-color: rgba(86, 211, 100, 0.3);
+  color: #56d364;
+}
+
+#suggestions .selected {
+  background: rgba(86, 211, 100, 0.15);
+  border-color: #56d364;
+  color: #56d364;
+  font-weight: 700;
+}
+
+.command-input.command-entered #cmd {
+  font-weight: 700;
+}
+
+/* ============================================================
+   IDEA #7 — BOOT SEQUENCE STYLES
+   ============================================================ */
+.boot-line {
+  font-size: 13px;
+  color: #8b949e;
+  line-height: 1.9;
+  animation: fadeInUp 0.15s ease forwards;
+}
+
+.boot-ok    { color: #56d364; font-weight: 700; }
+.boot-warn  { color: #e3b341; font-weight: 700; }
+.boot-label { color: #79c0ff; }
+
+/* ============================================================
+   IDEA #8 — PROJECT CARDS REDESIGN (dark, terminal-native)
+   ============================================================ */
+.projectsDiv {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.project-wrapper {
+  width: 260px;
+  background: rgba(22, 27, 34, 0.9);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-left: 3px solid #56d364;
+  border-radius: 6px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.project-wrapper::before {
+  content: '→';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%) translateX(6px);
+  color: #56d364;
+  font-size: 18px;
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.project-wrapper:hover {
+  background: rgba(86, 211, 100, 0.05);
+  border-left-color: #79c0ff;
+  border-color: rgba(121, 192, 255, 0.2);
+  border-left-color: #79c0ff;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(121,192,255,0.1);
+  transform: translateY(-2px);
+}
+
+.project-wrapper:hover::before {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+.project-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.project-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #e0e0e0;
+  line-height: 1.3;
+}
+
+.project-description {
+  font-size: 12px;
+  color: #8b949e;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+.project-description code {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 11px;
+  color: #e3b341;
+  background: rgba(227, 179, 65, 0.08);
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid rgba(227,179,65,0.15);
+}
+
+.flex-pr {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+/* ============================================================
+   SKILLS — COORDINATE SYSTEM
+   ============================================================ */
+.coordinate-system {
+  position: relative;
+  width: 420px;
+  height: 420px;
+  background: rgba(13, 17, 23, 0.6);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  color: #fff;
+  margin-top: 16px;
+}
+
+.x-axis, .y-axis {
+  position: absolute;
+  background-color: rgba(255,255,255,0.2);
+}
+
+.x-axis {
+  width: 100%;
+  height: 1px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.y-axis {
+  height: 100%;
+  width: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.x-label {
+  position: absolute;
+  bottom: 103%;
+  left: 25%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: bold;
+  color: rgba(255,255,255,0.4);
+  white-space: nowrap;
+}
+
+.x-label-2 {
+  position: absolute;
+  bottom: 103%;
+  left: 75%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: bold;
+  color: rgba(255,255,255,0.4);
+  white-space: nowrap;
+}
+
+.y-label {
+  position: absolute;
+  bottom: 70%;
+  left: 500px;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: bold;
+  color: rgba(255,255,255,0.4);
+  white-space: nowrap;
+  padding: 0 10px;
+}
+
+.y-label-2 {
+  position: absolute;
+  bottom: 20%;
+  left: 500px;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: bold;
+  color: rgba(255,255,255,0.4);
+  white-space: nowrap;
+  padding: 0 10px;
+}
+
+.arrow-image {
+  position: absolute;
+  top: 75%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(180deg);
+  width: 24px;
+  height: 24px;
+  opacity: 0.4;
+}
+
+.arrow-image_2 {
+  position: absolute;
+  top: 25%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(360deg);
+  width: 24px;
+  height: 24px;
+  opacity: 0.4;
+}
+
+.arrow-image_3 {
+  position: absolute;
+  top: 50%;
+  left: 75%;
+  transform: translate(-50%, -50%) rotate(450deg);
+  width: 24px;
+  height: 24px;
+  opacity: 0.4;
+}
+
+.quadrant {
+  position: absolute;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 5px;
+}
+
+.quadrant.tr { top: 10px; right: 10px; }
+.quadrant.bl { bottom: 140px; left: 110px; }
+.quadrant.br { bottom: 140px; right: 1px; }
+
+.quadrant-box {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.quadrant-box.tl {
+  top: 10px;
+  left: 10px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.quadrant-box.tl::-webkit-scrollbar { width: 3px; }
+.quadrant-box.tl::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+/* Tech icon grid */
+.tech-section { margin-bottom: 12px; }
+
+.tech-category {
+  color: #79c0ff;
+  font-size: 10px;
+  font-weight: bold;
+  margin-bottom: 6px;
+  text-align: left;
+  border-bottom: 1px solid rgba(121, 192, 255, 0.2);
+  padding-bottom: 3px;
+}
+
+.tech-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-content: flex-start;
+}
+
+.tech-icon {
+  font-size: 22px;
+  color: rgba(255,255,255,0.55);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.tech-icon:hover {
+  transform: scale(1.2) translateY(-2px);
+  filter: drop-shadow(0 0 6px currentColor);
+  color: #fff;
+}
+
+/* Individual icon colors on hover */
+.devicon-javascript-plain:hover        { color: #F7DF1E; }
+.devicon-html5-plain:hover             { color: #E34F26; }
+.devicon-css3-plain:hover              { color: #1572B6; }
+.devicon-typescript-plain:hover        { color: #3178C6; }
+.devicon-react-original:hover          { color: #61DAFB; }
+.devicon-redux-original:hover          { color: #764ABC; }
+.devicon-tailwindcss-plain:hover       { color: #06B6D4; }
+.devicon-nextjs-original:hover         { color: #ffffff; }
+.devicon-nodejs-plain:hover            { color: #339933; }
+.devicon-python-plain:hover            { color: #3776AB; }
+.devicon-php-plain:hover               { color: #777BB4; }
+.devicon-express-original:hover        { color: #ffffff; }
+.devicon-flask-original:hover          { color: #ffffff; }
+.devicon-mysql-plain:hover             { color: #4479A1; }
+.devicon-mongodb-plain:hover           { color: #47A248; }
+.devicon-c-plain:hover                 { color: #A8B9CC; }
+.devicon-cplusplus-plain:hover         { color: #00599C; }
+.devicon-java-plain:hover              { color: #007396; }
+.devicon-amazonwebservices-plain-wordmark:hover { color: #FF9900; }
+.devicon-docker-plain:hover            { color: #2496ED; }
+.devicon-firebase-plain:hover          { color: #FFCA28; }
+.devicon-vercel-original:hover         { color: #ffffff; }
+.devicon-git-plain:hover               { color: #F05032; }
+.devicon-github-original:hover         { color: #ffffff; }
+.devicon-jira-plain:hover              { color: #0052CC; }
+.devicon-trello-plain:hover            { color: #0052CC; }
+.devicon-postman-plain:hover           { color: #FF6C37; }
+.devicon-npm-original-wordmark:hover   { color: #CB3837; }
+.devicon-junit-plain:hover             { color: #25A162; }
+.devicon-selenium-original:hover       { color: #43B02A; }
+.devicon-figma-plain:hover             { color: #F24E1E; }
+.devicon-photoshop-plain:hover         { color: #31A8FF; }
+.devicon-illustrator-plain:hover       { color: #FF9A00; }
+.devicon-latex-original:hover          { color: #008080; }
+
+/* Skills quadrant boxes */
+.skills-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+}
+
+.skills-row {
+  display: flex;
+  gap: 5px;
+  width: 100%;
+}
+
+.skill-box-2,
+.skill-box-3,
+.skill-box-4 {
+  flex: 1;
+  min-height: 36px;
+  padding: 8px 6px;
+  border-radius: 4px;
+  color: rgba(255,255,255,0.85);
+  font-weight: 600;
+  text-align: center;
+  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.4;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  cursor: default;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.skill-box-2:hover,
+.skill-box-3:hover,
+.skill-box-4:hover {
+  opacity: 0.7;
+  transform: scale(0.97);
+}
+
+.skill-box-2:nth-child(1) { background-color: rgba(86,211,100,0.25);  border: 1px solid rgba(86,211,100,0.3); }
+.skill-box-2:nth-child(2) { background-color: rgba(121,192,255,0.2);  border: 1px solid rgba(121,192,255,0.3); }
+.skill-box-2:nth-child(3) { background-color: rgba(227,179,65,0.2);   border: 1px solid rgba(227,179,65,0.3); }
+.skill-box-2:nth-child(4) { background-color: rgba(248,81,73,0.2);    border: 1px solid rgba(248,81,73,0.3); }
+
+.skill-box-3:nth-child(1) { background-color: rgba(114,21,177,0.3);   border: 1px solid rgba(114,21,177,0.4); }
+.skill-box-4:nth-child(1) { background-color: rgba(52,152,219,0.25);  border: 1px solid rgba(52,152,219,0.3); }
+.skill-box-4:nth-child(2) { background-color: rgba(227,179,65,0.2);   border: 1px solid rgba(227,179,65,0.3); }
+
+.text-tr, .text-bl, .text-br {
+  position: absolute;
+  font-size: 10px;
+  font-weight: bold;
+  color: rgba(255,255,255,0.25);
+  text-align: left;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+  line-height: 1.6;
+}
+
+.text-tr:hover,
+.text-bl:hover,
+.text-br:hover { color: rgba(255,255,255,0.7); }
+
+.text-tr {
+  top: 32%;
+  left: 75%;
+  transform: translate(-50%, -50%);
+}
+
+.text-bl {
+  bottom: 25%;
+  left: 25%;
+  transform: translate(-50%, 50%);
+}
+
+.text-br {
+  bottom: -40px;
+  right: 60%;
+  transform: translate(50%, 50%);
+}
+
+/* ============================================================
+   AVATAR (kept for if image is added later)
+   ============================================================ */
+.avatar {
+  margin-left: 20px;
+  margin-top: 30px;
+  opacity: 0.7;
+  width: 150px;
+  height: 200px;
+  filter: grayscale(50%);
+  transition: filter 0.3s ease, opacity 0.3s ease;
+  cursor: pointer;
+}
+
+.avatar:hover {
+  filter: grayscale(0%);
+  opacity: 1;
+}
+
+/* ============================================================
+   MODAL (kept for future use)
+   ============================================================ */
+.modal {
+  position: fixed;
+  z-index: 900;
+  inset: 0;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  max-width: 90%;
+  max-height: 90%;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 24px;
+  right: 28px;
+  color: rgba(255,255,255,0.6);
+  font-size: 32px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.modal-close:hover { color: #f85149; }
+
+/* ============================================================
+   MISC UTILITIES
+   ============================================================ */
+.artwork-message {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
+}
+
+.nameErr { font-size: 80px; }
+.descErr { font-size: 10px; }
+
+/* Commented-out skill bars kept for reference */
+/*
+.skillBar { ... }
+*/
